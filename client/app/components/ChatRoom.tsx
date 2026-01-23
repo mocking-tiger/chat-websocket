@@ -64,7 +64,9 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
         };
         setMessages((prev) => [...prev, newMessage]);
       } catch (error) {
-        console.error("메시지 파싱 에러:", error);
+        console.error("❌ 메시지 파싱 에러:", error);
+        console.error("받은 데이터:", event.data);
+        console.error("데이터 타입:", typeof event.data);
       }
     };
 
@@ -75,8 +77,9 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
     };
 
     // 에러 발생
-    ws.onerror = (error) => {
-      console.error("⚠️ WebSocket 에러:", error);
+    ws.onerror = (event) => {
+      console.error("⚠️ WebSocket 에러 발생");
+      console.error("서버가 실행 중인지 확인하세요: ws://localhost:8080");
     };
 
     // 컴포넌트 언마운트 시 연결 종료

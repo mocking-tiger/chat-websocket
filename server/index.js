@@ -22,13 +22,16 @@ wss.on("connection", (ws) => {
   // ping: 클라이언트가 연결 유지를 위해 보낸 패킷
   // pong: 서버가 클라이언트의 ping에 대한 응답
   ws.on("message", (message) => {
-    console.log("메시지 수신:", message);
+    // message는 Buffer 타입이므로 문자열로 변환
+    const messageString = message.toString();
+    console.log("메시지 수신:", messageString);
 
     // 모든 클라이언트에 브로드캐스트
     wss.clients.forEach((client) => {
       // OPEN은 클래스의 static 상수이기 때문에 ws가 아닌 WebSocket.OPEN으로 접근해야 함
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
+        // 문자열로 변환해서 전송
+        client.send(messageString);
       }
     });
   });
