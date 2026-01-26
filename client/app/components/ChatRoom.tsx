@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 interface ChatRoomProps {
   nickname: string;
+  setNickname: (nickname: string) => void;
 }
 
 interface Message {
@@ -12,9 +13,9 @@ interface Message {
   content: string;
   timestamp: Date;
   type: "user" | "system";
-}
+}   
 
-const ChatRoom = ({ nickname }: ChatRoomProps) => {
+const ChatRoom = ({ nickname, setNickname }: ChatRoomProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -120,8 +121,11 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
       {/* 헤더 */}
       <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
         <div>
+          <div className="flex items-center gap-2">
           <h2 className="text-white text-xl font-bold">채팅방</h2>
           <p className="text-blue-100 text-sm">{nickname}님으로 접속 중</p>
+          <button onClick={()=>setNickname("")} className="text-white text-sm bg-red-400 px-2 py-1 rounded-md">나가기</button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <div
