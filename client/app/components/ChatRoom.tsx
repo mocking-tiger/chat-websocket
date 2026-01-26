@@ -32,13 +32,17 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
 
   // WebSocket 연결
   useEffect(() => {
-    // WebSocket 연결 생성
+    let isMounted = true;
     const ws = new WebSocket("ws://localhost:8080");
     wsRef.current = ws;
 
-    // 연결 성공
     ws.onopen = () => {
-      console.log("✅ WebSocket 연결 성공");
+      if (!isMounted) {
+        ws.close();
+        return;
+      }
+      
+      console.log("✅ WebSocket 연결됨");
       setIsConnected(true);
 
       // 입장 메시지 전송
@@ -50,9 +54,9 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
       ws.send(JSON.stringify(joinMessage));
     };
 
-    // 메시지 수신
     ws.onmessage = (event) => {
-      console.log("📨 메시지 수신:", event.data);
+      if (!isMounted) return;
+      
       try {
         const data = JSON.parse(event.data);
         const newMessage: Message = {
@@ -64,26 +68,24 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
         };
         setMessages((prev) => [...prev, newMessage]);
       } catch (error) {
-        console.error("❌ 메시지 파싱 에러:", error);
-        console.error("받은 데이터:", event.data);
-        console.error("데이터 타입:", typeof event.data);
+        console.error("메시지 파싱 에러:", error);
       }
     };
 
-    // 연결 종료
     ws.onclose = () => {
-      console.log("❌ WebSocket 연결 종료");
+      if (!isMounted) return;
+      console.log("WebSocket 연결 종료");
       setIsConnected(false);
     };
 
-    // 에러 발생
-    ws.onerror = (event) => {
-      console.error("⚠️ WebSocket 에러 발생");
-      console.error("서버가 실행 중인지 확인하세요: ws://localhost:8080");
+    ws.onerror = () => {
+      if (!isMounted) return;
+      console.error("WebSocket 에러 발생");
     };
 
-    // 컴포넌트 언마운트 시 연결 종료
     return () => {
+      isMounted = false;
+      
       if (ws.readyState === WebSocket.OPEN) {
         const leaveMessage = {
           type: "system",
@@ -92,6 +94,7 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
         };
         ws.send(JSON.stringify(leaveMessage));
       }
+      
       ws.close();
     };
   }, [nickname]);
@@ -115,7 +118,7 @@ const ChatRoom = ({ nickname }: ChatRoomProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden h-[600px] flex flex-col">
       {/* 헤더 */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+      <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
         <div>
           <h2 className="text-white text-xl font-bold">채팅방</h2>
           <p className="text-blue-100 text-sm">{nickname}님으로 접속 중</p>
